@@ -1,0 +1,42 @@
+
+from scrapy.spider import BaseSpider
+from scrapy.selector import HtmlXPathSelector
+import re
+import sys
+from dmoz.items import DmozItem
+
+class DmozSpider(BaseSpider):
+   name = "mountain"
+   allowed_domains = ["mtbr.com"]
+   start_urls = [
+	'http://trails.mtbr.com/cat/united-states-trails/trails-arizona/trail/k-trail-quartz-ridge-and-the-crazy-eight/prd_455166_4513crx.aspx'
+   ]
+
+   def parse(self, response):
+       hxs = HtmlXPathSelector(response)
+       sites = hxs.select('//ul/li')
+       items = []
+       for site in sites:
+           item = DmozItem()
+           item['latitude'] = site.select('//*[@id="Latitude"]').extract()
+	   item['longitude'] = site.select('//*[@id="Longitude"]').extract()
+           item['name']  = site.select('//*[@id="productname"]/b').extract()
+    #       crag = site.select('').extract()
+	   item['trail_length'] = site.select('//*[@id="Trail Length"]').extract()
+    #       wall = site.select('').extract()
+           item['location'] = site.select('//*[@id="City/County"]').extract()
+           item['dificulty'] = site.select('//*[@id="Trail Level"]').extract()
+    #       star = site.select('').extract()
+    #       climb = site.select('').extract()
+    #       image = site.select('').extract()
+    #       rock = site.select('').extract()
+       items = list(set(items))
+       items.append(item)
+       return items
+
+
+'''this works
+           item['title'] = site.select('a/text()').extract()
+           item['link'] = site.select('a/@href').extract()
+           item['desc'] = site.select('text()').extract()
+'''
